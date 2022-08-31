@@ -1,0 +1,55 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: issue-service-deployment
+spec:
+  selector:
+    matchLabels:
+      app:  issue-service-k8
+  replicas: 3
+  template:
+    metadata:
+      labels:
+        app:  issue-service-k8
+    spec:
+      containers:
+        - name: issue-service
+          image: issue-service:1.0
+          ports:
+            - containerPort: 8080
+          env:
+            - name: DB_HOST
+              valueFrom:
+                configMapKeyRef:
+                  name: db-config
+                  key: host
+            - name: DB_NAME
+              valueFrom:
+                configMapKeyRef:
+                  name: db-config
+                  key: dbName
+            - name: DB_USERNAME
+              valueFrom:
+                secretKeyRef:
+                  name: secrets
+                  key: username
+            - name: DB_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: secrets
+                  key: password
+            - name: BOOK_SERVICE
+              value: http://book-service-svc:8082
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: issue-service-svc
+spec:
+  selector:
+    app: issue-service-k8
+  ports:
+    - protocol: "TCP"
+      port: 8080
+      targetPort: 8080
+  type: ClusterIP

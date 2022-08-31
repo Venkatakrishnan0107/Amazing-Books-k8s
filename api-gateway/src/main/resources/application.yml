@@ -1,0 +1,20 @@
+server:
+  port: 8083
+spring:
+  application:
+    name: API-GATEWAY
+  cloud:
+    gateway:
+      routes:
+        - id: orderService
+          uri: http://order-service-svc:8081
+          predicates:
+            - Path=/orders/**
+        - id: issueService
+          uri: http://issue-service-svc:8080
+          predicates:
+            - Path=/issue/**
+        - id: bookService
+          uri: http://book-service-svc:8082
+          predicates:
+            - Path=/books/**
